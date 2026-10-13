@@ -1,16 +1,16 @@
 # Neon Outlaws
 Original stylized 3D open-world browser game alpha built with Three.js, TypeScript, and Vite.
 
-## Alpha 1.1: launch on Windows PowerShell
+## Alpha 1.2: launch on Windows PowerShell
 
-Extract `NeO-777-Alpha-1.1.zip` to a new folder, then open PowerShell in the folder containing `package.json`. If an older game server is running, stop it with Ctrl+C in its terminal first. Use the same browser address and port as before to keep browser progress.
+Extract `NeO-777-Alpha-1.2.zip` to a new folder, then open PowerShell in the folder containing `package.json`. If an older game server is running, stop it with Ctrl+C in its terminal first. Use the same browser address and port as before to keep browser progress.
 
 ```powershell
 npm.cmd ci
 npm.cmd run dev -- --port 5173 --strictPort
 ```
 
-Open the local address Vite prints. Check for **ALPHA 1.1** in the HUD. The `.cmd` suffix works in PowerShell even when its script policy blocks `npm.ps1`. Cloud-only Bash helpers and `/workspace` paths are not Windows commands. If port 5173 is occupied, stop your previous game server; the strict port option prevents silently moving to a different browser save origin.
+Open the local address Vite prints. Check for **ALPHA 1.2** in the HUD. The `.cmd` suffix works in PowerShell even when its script policy blocks `npm.ps1`. Cloud-only Bash helpers and `/workspace` paths are not Windows commands. If port 5173 is occupied, stop your previous game server; the strict port option prevents silently moving to a different browser save origin.
 
 To test an update, run these in a second terminal in the same folder:
 
@@ -20,6 +20,14 @@ npm.cmd run build
 ```
 
 The automated checks cover physical momentum/energy, mass differences, separating contacts, fast impacts, piles, walls/canals, braking/traction, frame-rate consistency, police vision, deformation sleep and repair. For a production browser check, stop the dev server and run `npm.cmd run preview -- --port 5173 --strictPort`. Development-only wanted shortcuts are disabled in production.
+
+## Alpha 1.2: hit officers with your car
+
+- Drive a moving car into an officer on foot to knock them into a non-graphic ragdoll reaction. Forward, reverse, angled and turning impacts use the car's actual swept footprint. The car needs roughly 9 MPH; parked or barely moving cars do not repeatedly trigger hits.
+- A struck officer's pull/arrest attempt is interrupted. Their unit cannot shoot or arrest for 6.5 game seconds; after recovery it rejoins the existing pursuit. Each officer hit adds one wanted star, capped at five, and reports the incident location. Existing F grapple escape and all driving controls remain.
+- The car's minimap arrow follows actual travel direction: north-to-south movement points down, including when reversing. At a stop it shows body facing without jitter. Police cones still show the officers' facing and detection direction.
+
+To test in the dev server: press **5**, wait for officers to leave nearby patrols, enter your car with **E**, then use **W/S** to drive through an officer. Watch the ragdoll, wanted response and interrupted arrest warning. Press **0** to clear wanted. Check the arrow while driving north/south, reversing and turning. These debug wanted keys are disabled in production.
 
 ## Alpha 1.1 gameplay changes
 

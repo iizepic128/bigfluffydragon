@@ -15,7 +15,7 @@ export class Ragdoll {
   private readonly links: Link[] = [];
   private readonly head: THREE.Mesh;
   private age = 0;
-  readonly lifetime = 28;
+  readonly lifetime: number;
 
   constructor(
     scene: THREE.Scene,
@@ -26,7 +26,9 @@ export class Ragdoll {
     pantsColor: number,
     impact: THREE.Vector3,
     speed: number,
+    lifetime = 28,
   ) {
+    this.lifetime = lifetime;
     const pose: [number, number, number][] = [
       [0, 1.1, 0],      // 0 pelvis
       [0, 2.1, 0],      // 1 chest

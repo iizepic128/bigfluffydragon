@@ -1,11 +1,11 @@
 {
   "name": "neon-outlaws",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "tsc && vite build",
-    "test": "node --import ./tests/register-typescript.mjs --test tests/vehiclePhysics.test.mjs tests/vehicleVisuals.test.mjs tests/policeVision.test.mjs",
+    "test": "node --import ./tests/register-typescript.mjs --test tests/vehiclePhysics.test.mjs tests/vehicleVisuals.test.mjs tests/policeVision.test.mjs tests/vehicleHits.test.mjs tests/mapHeading.test.mjs tests/ragdoll.test.mjs",
     "preview": "vite preview --host 0.0.0.0"
   },
   "dependencies": {

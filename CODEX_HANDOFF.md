@@ -2,9 +2,9 @@
 
 ## Current snapshot
 
-Alpha 1.1 is the current source of truth. Three.js, TypeScript and Vite; original emerald-and-gold NeO 777 assets remain unchanged. Start from this existing project folder; cloud tasks are already isolated and do not require another worktree.
+Alpha 1.2 is the current source of truth. Three.js, TypeScript and Vite; original emerald-and-gold NeO 777 assets remain unchanged. Start from this existing project folder; cloud tasks are already isolated and do not require another worktree.
 
-The source began as a user-uploaded ZIP in an empty GitHub checkout. Alpha 1.1 is now committed and delivered on the `codex/neo777-alpha-1-1` branch of `iizepic128/bigfluffydragon`. Preserve this branch and existing local work rather than replacing it with older source.
+The source began as a user-uploaded ZIP in an empty GitHub checkout. Updates are committed and delivered on the `codex/neo777-alpha-1-1` branch of `iizepic128/bigfluffydragon`. Preserve this branch and existing local work rather than replacing it with older source.
 
 ## Launch and checks
 
@@ -17,12 +17,16 @@ Requires Node.js 20.19+ or 22.12+ (validated with Node 24.19.0). In Windows Powe
 - `src/main.ts`: original procedural city, gameplay, missions/shops/save keys, player input, pursuit states, camera and HUD.
 - `src/vehiclePhysics.ts`: shared ground-plane capsule bodies, mass/inertia, impulse/friction contacts, substeps, world constraints, player handling and AI velocity commands. No rendering dependency.
 - `src/vehicleVisuals.ts`: original cars, bounded panel-space dents with sleeping buffers, wheel steering/spin and acceleration-driven suspension. Dents remain visual; collision shape stays stable.
+- `src/vehicleHits.ts`: swept capsule detection for player-car hits on officers; actual clipped poses prevent intended-motion hits behind walls.
+- `src/mapHeading.ts`: player-car map arrow follows actual world velocity, with a facing fallback at rest.
 - `src/policeVision.ts`: shared heading/range/field-of-view rules and top-down wall-clipped vision outlines.
 - `src/minimap.ts`: GPS and interactive map; red patrol/orange officer cones while wanted, brighter when that observer sees you. Ground cones are 120 degrees with 47/34-unit ranges; nearby awareness radius is 2.4. Actual detection also requires the existing 3D line of sight.
 
 ## Behavior to preserve
 
 WASD walk/drive, Shift sprint, E interact/enter/exit/surrender, Space brake, F repeated grapple resistance, R safe reset, M/Esc map. Development-only 5/0 shortcuts must remain disabled in production. Preserve `neon-save` and `neo777-save` cash/rep/completed/upgrades. Browsers store progression by origin, so use the same hostname and port when updating.
+
+Moving player cars can knock officers into 6.5-second ragdolls, interrupt pull/arrest attempts, and add wanted heat. Recovery disables that unit until it can rejoin pursuit; cached officer models avoid repeated model/material allocation. Parked/slow cars do not cause repeated hits. Player-car minimap heading follows actual travel, including reverse; officer sight cones remain tied to their facing.
 
 Missions, shops, cash/ragdolls, five wanted stars, helicopter, canals/bridges/cover, wanted cooldown and original branding remain. Officers extract only stopped/slow cars (actual speed <=2.5), need a reachable clear exit and sight, and cancel pull progress when the car drives away. Seven distinct F presses within 3.8 seconds escape; otherwise a smooth red COOKED sequence leads to the existing fine and safe respawn.
 

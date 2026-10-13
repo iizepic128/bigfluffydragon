@@ -4,7 +4,9 @@ import { createHuman, animateHuman, SHIRT_COLORS, type Human } from './character
 import { Ragdoll } from './ragdoll';
 import { createMinimap, type MapPoint } from './minimap';
 import { createVehicle, dentVehicle, carDamage, repairVehicle, updateVehicleVisuals } from './vehicleVisuals';
-import { createVehicleMotion, resetMotion, forwardSpeed, vehicleSpeed as motionSpeed, vehicleOverlapsCircle, vehiclesOverlap, vehicleWorldBlocked, updateDrivenVehicle, driveToward, stepVehiclePhysics, type VehicleMotion, type VehicleImpact } from './vehiclePhysics';
+import { createVehicleMotion, resetMotion, forwardSpeed, vehicleSpeed as motionSpeed, vehicleOverlapsCircle, vehiclesOverlap, vehicleWorldBlocked, updateDrivenVehicle, driveToward, stepVehiclePhysics, type VehicleMotion, type VehicleImpact, VEHICLE_RADIUS, VEHICLE_HALF_SEGMENT } from './vehiclePhysics';
+import { sweptVehicleHit, type VehicleHitPose } from './vehicleHits';
+import { vehicleMapHeading } from './mapHeading';
 import { inPoliceVisionCone, POLICE_CAR_VISION_RANGE, POLICE_OFFICER_VISION_RANGE, POLICE_VISION_FOV } from './policeVision';
 
 type Save = { cash:number; rep:number; completed:number; upgrades:number };
@@ -27,7 +29,7 @@ function load():Save{
 }
 const save=load();
 const app=document.querySelector<HTMLDivElement>('#app')!;
-app.innerHTML=`<div id="hud"><div id="brand"><img id="brand-logo" src="/neo777-brand-v08.png?v=8" alt="NeO 777 logo"/><div id="brand-text"><h1>NeO <span>777</span></h1><p>THE CITY NEVER FOLDS · ALPHA 1.1</p></div></div><div id="stats"></div><div id="wanted" aria-live="polite"></div><div id="police-hud" aria-live="polite"></div><div id="health-hud" aria-live="polite"></div><div id="vehicle-hud" aria-live="polite"></div><div id="cover-status" aria-live="polite"></div><div id="mission"></div><div id="hint">WASD move / drive · Shift sprint · E interact / enter / exit car · Space brake · R reset</div><div id="toast"></div></div><div id="cross">+</div><div id="grapple-overlay" hidden><strong id="grapple-title">OFFICER ENGAGED</strong><span id="grapple-instructions">Press F repeatedly to break free!</span><div id="grapple-meter"><span id="grapple-fill"></span></div><small id="grapple-time"></small></div><div id="arrest-overlay" hidden role="alert" aria-live="assertive"><div class="arrest-backdrop"></div><div class="arrest-message"><strong>COOKED</strong><span id="arrest-caption">ARRESTED</span></div></div><aside id="radar" aria-label="Live city minimap"><div id="radar-title"><b>NeO 777</b><span>LIVE GPS</span></div><canvas id="minimap" width="420" height="420" aria-label="Player, police vision cones, shops, bridges, and shelters on the local minimap"></canvas><div id="gps-status">GPS initializing…</div><div class="radar-actions"><button id="radar-zoom-in" title="Zoom minimap in" aria-label="Zoom in">+</button><button id="radar-zoom-out" title="Zoom minimap out" aria-label="Zoom out">−</button><button id="open-map" title="Open city map (M)">MAP <kbd>M</kbd></button></div><div class="radar-legend"><span><i class="legend-dot mission-dot"></i> Mission</span><span><i class="legend-dot shop-dot"></i> Shop</span><span><i class="legend-dot shelter-dot"></i> Cover</span><span><i class="legend-dot police-dot"></i> Police</span></div></aside><div id="map-overlay" hidden role="dialog" aria-label="Full city map"><section class="worldmap-panel"><div class="worldmap-head"><div><h2>NeO 777 // CITY MAP</h2><p id="map-destination">Click a marker to set GPS route</p></div><button id="close-map" aria-label="Close map">✕</button></div><div class="worldmap-body"><canvas id="worldmap" width="760" height="760" aria-label="Click a shop, mission, bridge, or shelter to set a GPS destination"></canvas><div class="map-key"><h3>MAP KEY</h3><p><i class="legend-dot mission-dot"></i> Mission</p><p><i class="legend-dot shop-dot"></i> Shop / garage</p><p><i class="legend-dot shelter-dot"></i> Parking shelter</p><p><i class="legend-dot bridge-dot"></i> Road bridge / skybridge</p><p><i class="legend-dot police-dot"></i> Police patrol / red sight cone</p><p><i class="legend-dot officer-dot"></i> Officer on foot / orange sight cone</p><p><i class="legend-dot helicopter-dot"></i> Helicopter (5 stars)</p><p><i class="legend-dot player-dot"></i> You (arrow)</p><button id="mission-route">Navigate to mission</button><small>Click any marker to route there. Press M or Esc to close.</small></div></div></section></div>`;
+app.innerHTML=`<div id="hud"><div id="brand"><img id="brand-logo" src="/neo777-brand-v08.png?v=8" alt="NeO 777 logo"/><div id="brand-text"><h1>NeO <span>777</span></h1><p>THE CITY NEVER FOLDS · ALPHA 1.2</p></div></div><div id="stats"></div><div id="wanted" aria-live="polite"></div><div id="police-hud" aria-live="polite"></div><div id="health-hud" aria-live="polite"></div><div id="vehicle-hud" aria-live="polite"></div><div id="cover-status" aria-live="polite"></div><div id="mission"></div><div id="hint">WASD move / drive · Shift sprint · E interact / enter / exit car · Space brake · R reset</div><div id="toast"></div></div><div id="cross">+</div><div id="grapple-overlay" hidden><strong id="grapple-title">OFFICER ENGAGED</strong><span id="grapple-instructions">Press F repeatedly to break free!</span><div id="grapple-meter"><span id="grapple-fill"></span></div><small id="grapple-time"></small></div><div id="arrest-overlay" hidden role="alert" aria-live="assertive"><div class="arrest-backdrop"></div><div class="arrest-message"><strong>COOKED</strong><span id="arrest-caption">ARRESTED</span></div></div><aside id="radar" aria-label="Live city minimap"><div id="radar-title"><b>NeO 777</b><span>LIVE GPS</span></div><canvas id="minimap" width="420" height="420" aria-label="Player, police vision cones, shops, bridges, and shelters on the local minimap"></canvas><div id="gps-status">GPS initializing…</div><div class="radar-actions"><button id="radar-zoom-in" title="Zoom minimap in" aria-label="Zoom in">+</button><button id="radar-zoom-out" title="Zoom minimap out" aria-label="Zoom out">−</button><button id="open-map" title="Open city map (M)">MAP <kbd>M</kbd></button></div><div class="radar-legend"><span><i class="legend-dot mission-dot"></i> Mission</span><span><i class="legend-dot shop-dot"></i> Shop</span><span><i class="legend-dot shelter-dot"></i> Cover</span><span><i class="legend-dot police-dot"></i> Police</span></div></aside><div id="map-overlay" hidden role="dialog" aria-label="Full city map"><section class="worldmap-panel"><div class="worldmap-head"><div><h2>NeO 777 // CITY MAP</h2><p id="map-destination">Click a marker to set GPS route</p></div><button id="close-map" aria-label="Close map">✕</button></div><div class="worldmap-body"><canvas id="worldmap" width="760" height="760" aria-label="Click a shop, mission, bridge, or shelter to set a GPS destination"></canvas><div class="map-key"><h3>MAP KEY</h3><p><i class="legend-dot mission-dot"></i> Mission</p><p><i class="legend-dot shop-dot"></i> Shop / garage</p><p><i class="legend-dot shelter-dot"></i> Parking shelter</p><p><i class="legend-dot bridge-dot"></i> Road bridge / skybridge</p><p><i class="legend-dot police-dot"></i> Police patrol / red sight cone</p><p><i class="legend-dot officer-dot"></i> Officer on foot / orange sight cone</p><p><i class="legend-dot helicopter-dot"></i> Helicopter (5 stars)</p><p><i class="legend-dot player-dot"></i> You (arrow)</p><button id="mission-route">Navigate to mission</button><small>Click any marker to route there. Press M or Esc to close.</small></div></div></section></div>`;
 const grappleOverlay=document.querySelector<HTMLElement>('#grapple-overlay')!;const grappleFill=document.querySelector<HTMLElement>('#grapple-fill')!;const grappleTime=document.querySelector<HTMLElement>('#grapple-time')!;const arrestOverlay=document.querySelector<HTMLElement>('#arrest-overlay')!;const arrestCaption=document.querySelector<HTMLElement>('#arrest-caption')!;const policeHud=document.querySelector<HTMLElement>('#police-hud')!;const healthHud=document.querySelector<HTMLElement>('#health-hud')!;const vehicleHud=document.querySelector<HTMLElement>('#vehicle-hud')!;const wantedEl=document.querySelector('#wanted')!;const coverEl=document.querySelector<HTMLElement>('#cover-status')!;const stats=document.querySelector('#stats')!, missionEl=document.querySelector('#mission')!,toastEl=document.querySelector('#toast')!;
 let toastTimer=0;
 function toast(s:string){toastEl.textContent=s;toastTimer=3.5}
@@ -357,8 +359,8 @@ function simulateVehicles(dt:number){
   stepVehiclePhysics(allVehicles,carMotion,dt,(x,z,r)=>collides(x,z,r)||(player.visible&&Math.hypot(x-player.position.x,z-player.position.z)<r+.78),handleVehicleImpact);
 }
 const policeByWanted=[0,1,2,3,4,6];
-type PoliceUnit={car:THREE.Group;officer:Human|null;lastKnown:THREE.Vector3;memory:number;shotCooldown:number;obstacleTurn:number;detourTime:number;detourX:number;detourZ:number;unitSees:boolean;pullProgress:number};
-const units:PoliceUnit[]=police.map(c=>({car:c,officer:null,lastKnown:c.position.clone(),memory:0,shotCooldown:1,obstacleTurn:1,detourTime:0,detourX:0,detourZ:0,unitSees:false,pullProgress:0}));
+type PoliceUnit={car:THREE.Group;officer:Human|null;lastKnown:THREE.Vector3;memory:number;shotCooldown:number;obstacleTurn:number;detourTime:number;detourX:number;detourZ:number;unitSees:boolean;pullProgress:number;officerModel:Human|null;recovery:number};
+const units:PoliceUnit[]=police.map(c=>({car:c,officer:null,lastKnown:c.position.clone(),memory:0,shotCooldown:1,obstacleTurn:1,detourTime:0,detourX:0,detourZ:0,unitSees:false,pullProgress:0,officerModel:null,recovery:0}));
 let arrestOfficer:Human|null=null;
 const copRay=new THREE.Ray();const copHit=new THREE.Vector3();
 function groundHasSight(observer:THREE.Vector3,subject:THREE.Vector3){
@@ -466,18 +468,57 @@ function finishArrest(){
   struggleImmunity=4;toast(`${arrestReason} — released at city center, $${arrestFine} fine`);
 }
 function makeOfficer(u:PoliceUnit){
-  if(vehicleSpeed(u.car)>2)return;
+  if(u.recovery>0||u.officer||vehicleSpeed(u.car)>2)return;
   const spawn=vehicleExitLocations(u.car).find(position=>isExitClear(position)
     &&(!player.visible||position.distanceTo(player.position)>1.7)
     &&npcs.every(npc=>position.distanceTo(npc.position)>1.7)
     &&units.every(unit=>!unit.officer||position.distanceTo(unit.officer.position)>1.7));
   if(!spawn)return;
-  const npc=createHuman(0x1b4673,18+units.indexOf(u));
-  // Police cap and gold badge distinguish officers from civilians.
-  const hat=new THREE.Mesh(new THREE.CylinderGeometry(.38,.43,.17,12),mat(0x0c263d));hat.position.set(0,3.51,0);npc.add(hat);
-  const badge=new THREE.Mesh(new THREE.BoxGeometry(.12,.16,.035),mat(0xf8ce5c));badge.position.set(.25,2.36,.29);npc.add(badge);
-  npc.position.copy(spawn);const facing=(activeCar||player).position.clone().sub(spawn);npc.rotation.y=Math.atan2(facing.x,facing.z);scene.add(npc);u.officer=npc;
+  let npc=u.officerModel;
+  if(!npc){
+    npc=createHuman(0x1b4673,18+units.indexOf(u));
+    // Keep one reusable officer model per patrol, including its original cap/badge.
+    const hat=new THREE.Mesh(new THREE.CylinderGeometry(.38,.43,.17,12),mat(0x0c263d));hat.position.set(0,3.51,0);npc.add(hat);
+    const badge=new THREE.Mesh(new THREE.BoxGeometry(.12,.16,.035),mat(0xf8ce5c));badge.position.set(.25,2.36,.29);npc.add(badge);
+    u.officerModel=npc;
+  }
+  npc.position.copy(spawn);const facing=(activeCar||player).position.clone().sub(spawn);npc.rotation.y=Math.atan2(facing.x,facing.z);
+  animateHuman(npc,0,0);npc.visible=true;scene.add(npc);u.officer=npc;
+  u.shotCooldown=Math.max(u.shotCooldown,1);u.pullProgress=0;
   toast('Police officers have exited their patrol car!');
+}
+const OFFICER_RECOVERY_SECONDS=6.5;
+function hitOfficerWithCar(unit:PoliceUnit,direction:THREE.Vector3,speed:number){
+  const officer=unit.officer;
+  if(!officer||unit.recovery>0)return;
+  const doll=new Ragdoll(scene,officer.position.clone(),officer.rotation.y,officer.userData.shirtColor,officer.userData.skinColor,officer.userData.pantsColor,direction,speed,OFFICER_RECOVERY_SECONDS);
+  ragdolls.push(doll);scene.remove(officer);unit.officer=null;unit.officerModel=officer;
+  unit.recovery=OFFICER_RECOVERY_SECONDS;unit.pullProgress=0;unit.unitSees=false;
+  if(grapple?.officer===officer)resetGrapple();
+  if(arrestOfficer===officer){arrestOfficer=null;arrestProgress=0}
+  setWanted(Math.min(5,wanted+1));
+  // Refresh the reported incident even at the five-star cap.
+  const reported=(activeCar||player).position;
+  units.slice(0,policeByWanted[wanted]).forEach(u=>{u.lastKnown.copy(reported);u.memory=Math.max(u.memory,12)});
+  toast(`Officer hit by vehicle! Wanted ${wanted}/5`);
+}
+function sweepOfficers(from:VehicleHitPose,to:VehicleHitPose,speed:number){
+  if(!activeCar||speed<4||arrestSequence)return;
+  const direction=new THREE.Vector3(to.x-from.x,0,to.z-from.z);
+  if(direction.lengthSq()<.000001){const m=carMotion.get(activeCar)!;direction.set(m.vx,0,m.vz)}
+  if(direction.lengthSq()<.000001)return;
+  direction.normalize();
+  const start=new THREE.Vector3(from.x,0,from.z);
+  const end=new THREE.Vector3(to.x,0,to.z);
+  for(const unit of units){
+    const officer=unit.officer;
+    if(!officer||unit.recovery>0)continue;
+    // Use the integrated motion and world visibility; a wall stops strikes behind it.
+    if((groundHasSight(start,officer.position)||groundHasSight(end,officer.position))
+      &&sweptVehicleHit(from,to,{x:officer.position.x,z:officer.position.z},VEHICLE_RADIUS,VEHICLE_HALF_SEGMENT,officer.userData.radius)){
+      hitOfficerWithCar(unit,direction,speed);
+    }
+  }
 }
 type ShotEffect={line:THREE.Line;ttl:number};const shots:ShotEffect[]=[];
 function policeShoot(origin:THREE.Vector3,target:THREE.Vector3){
@@ -495,11 +536,13 @@ function updatePolice(dt:number,target:THREE.Object3D){
   let closeOfficer:Human|null=null;
   for(let i=0;i<units.length;i++){
     const u=units[i],car=u.car;
+    u.recovery=Math.max(0,u.recovery-dt);
     if(i>=count){
       u.unitSees=false;u.memory=0;u.pullProgress=0;
       if(u.officer){scene.remove(u.officer);u.officer=null;}
       continue;
     }
+    if(u.recovery>0){u.unitSees=false;u.pullProgress=0;u.memory=Math.max(0,u.memory-dt);driveToward(car,carMotion.get(car)!,0,0,0,dt);continue}
     const carDist=Math.hypot(car.position.x-target.position.x,car.position.z-target.position.z);
     const footDist=u.officer?Math.hypot(u.officer.position.x-target.position.x,u.officer.position.z-target.position.z):Infinity;
     const carSight=carDist<47&&policeCanSee(car,target.position,47);
@@ -684,9 +727,11 @@ const mapUI=createMinimap({
  collides,
  getState:()=>{
    const target=activeCar||player;
-   return {position:{x:target.position.x,z:target.position.z},heading:target.rotation.y,
+   const motion=activeCar?carMotion.get(activeCar):undefined;
+   const heading=motion?vehicleMapHeading(target.rotation.y,motion.vx,motion.vz):target.rotation.y;
+   return {position:{x:target.position.x,z:target.position.z},heading,
      wanted,completed:save.completed,missionActive,
-     police: wanted>0 ? units.slice(0,policeByWanted[wanted]).map(u=>({x:u.car.position.x,z:u.car.position.z,heading:u.car.rotation.y,range:POLICE_CAR_VISION_RANGE,fov:POLICE_VISION_FOV,detected:policeCanSee(u.car,target.position,POLICE_CAR_VISION_RANGE)})) : [],
+     police: wanted>0 ? units.slice(0,policeByWanted[wanted]).map(u=>({x:u.car.position.x,z:u.car.position.z,heading:u.car.rotation.y,range:u.recovery>0?0:POLICE_CAR_VISION_RANGE,fov:POLICE_VISION_FOV,detected:u.recovery<=0&&policeCanSee(u.car,target.position,POLICE_CAR_VISION_RANGE)})) : [],
      officers: wanted>0 ? units.slice(0,policeByWanted[wanted]).filter(u=>u.officer).map(u=>({x:u.officer!.position.x,z:u.officer!.position.z,heading:u.officer!.rotation.y,range:POLICE_OFFICER_VISION_RANGE,fov:POLICE_VISION_FOV,detected:policeCanSee(u.officer!,target.position,POLICE_OFFICER_VISION_RANGE)})) : [],
      helicopter:helicopterVisible?{x:helicopter.g.position.x,z:helicopter.g.position.z}:null};
  }
@@ -723,9 +768,11 @@ if(activeCar){
 const {anyGroundSight}=updatePolice(dt,target);
 target=activeCar||player;
 const previousPosition=activeCar?.position.clone();
+const previousCarPose:VehicleHitPose|null=activeCar?{x:activeCar.position.x,z:activeCar.position.z,heading:activeCar.rotation.y}:null;
 const impactSpeed=activeCar?vehicleSpeed(activeCar):0;
 simulateVehicles(dt);
 if(activeCar&&previousPosition&&impactSpeed>=4)sweepPedestrians(previousPosition,activeCar.position.clone().sub(previousPosition),impactSpeed);
+if(activeCar&&previousCarPose)sweepOfficers(previousCarPose,{x:activeCar.position.x,z:activeCar.position.z,heading:activeCar.rotation.y},impactSpeed);
 velocity=activeCar?forwardSpeed(activeCar,carMotion.get(activeCar)!):0;
 for(const car of allVehicles){
   const state=carMotion.get(car)!;
@@ -796,4 +843,4 @@ healthHud.innerHTML=`<strong>HEALTH ${Math.ceil(health)}%</strong><div class="hu
 vehicleHud.innerHTML=activeCar?`<strong>VEHICLE · ${Math.round(vehicleSpeed(activeCar)*2.2)} MPH</strong><div class="hud-meter car-meter"><span style="width:${carDamage(activeCar)}%"></span></div><small>Body damage: ${Math.round(carDamage(activeCar))}% · ${carDamage(activeCar)>50?'Handling impaired':'Drive carefully'} · Garage repairs</small>`:'';
 missionEl.innerHTML=missionActive?`<b>${m.title}</b><br>${m.desc}<br>Reach the yellow marker`: `<b>Next: ${m.title}</b><br>Visit the yellow marker near the center and press E`;if(toastTimer>0){toastTimer-=dt;if(toastTimer<=0)toastEl.textContent=''}mapUI.draw(now);renderer.render(scene,camera)}requestAnimationFrame(loop);
 window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
-toast('Welcome to NeO 777 Alpha 1.1 — Momentum, police vision & COOKED!');
+toast('Welcome to NeO 777 Alpha 1.2 — Momentum, police vision & COOKED!');
