@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "tsc && vite build",
-    "test": "node --import ./tests/register-typescript.mjs --test tests/*.test.mjs",
+    "test": "node --import ./tests/register-typescript.mjs --test tests/vehiclePhysics.test.mjs tests/vehicleVisuals.test.mjs tests/policeVision.test.mjs",
     "preview": "vite preview --host 0.0.0.0"
   },
   "dependencies": {

@@ -4,7 +4,7 @@
 
 Alpha 1.1 is the current source of truth. Three.js, TypeScript and Vite; original emerald-and-gold NeO 777 assets remain unchanged. Start from this existing project folder; cloud tasks are already isolated and do not require another worktree.
 
-The source began as a user-uploaded ZIP in an empty GitHub checkout. Files are local and uncommitted. Do not reset the source from the empty origin.
+The source began as a user-uploaded ZIP in an empty GitHub checkout. Alpha 1.1 is now committed and delivered on the `codex/neo777-alpha-1-1` branch of `iizepic128/bigfluffydragon`. Preserve this branch and existing local work rather than replacing it with older source.
 
 ## Launch and checks
 
