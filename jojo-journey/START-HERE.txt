@@ -1,0 +1,41 @@
+JOJO JOURNEY — QUICK PREVIEW
+
+OPEN IN OPERA / OPERA GX
+  1. Extract the ZIP to a folder you want to keep.
+  2. On Windows, double-click Open in Opera.cmd.
+     On macOS, double-click Open in Opera.command.
+  3. The tracker opens directly in Opera. No Node or server is needed.
+
+  Works without a launcher, too:
+  Open Opera, press Ctrl+O (Command+O on Mac), and choose JoJo-Journey.html.
+  Linux users can use Ctrl+O in Opera to open the same HTML file.
+
+  Use a current version of Opera or Opera GX. If a launcher is blocked by
+  your operating system, opening the HTML through Opera works without it.
+
+No installation:
+  Double-click JoJo-Journey.html to open the app in your browser.
+  The file includes all artwork, fonts, styles, and application code.
+
+Project preview (Node.js 22.13 or newer):
+  Open a terminal in this folder and run:
+
+    npm start
+
+  The launcher installs dependencies when needed, builds the latest app,
+  and starts the preview on port 5174. Use the address printed in the terminal.
+  Keep the terminal open. Press Ctrl+C to stop.
+
+  `npm run preview` does the same thing.
+  To open your desktop browser automatically: npm start -- --open
+
+If the port is busy:
+  Stop your previous dev/preview server, then run npm start again.
+  Or use npm start -- --port 5175.
+
+Your progress:
+  Keep using the same browser and the same file location or preview address.
+  Browser saves do not move automatically between a downloaded HTML file and
+  a server preview. Use Export progress backup and Import progress to transfer
+  your journey. If your browser blocks file-based saving, use npm start or
+  export a backup before closing the standalone preview.

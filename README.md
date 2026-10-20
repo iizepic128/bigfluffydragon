@@ -1,3 +1,15 @@
+# JoJo Journey — franchise progress tracker
+
+This branch includes the finished JoJo tracker in [`jojo-journey/`](jojo-journey/README.md), with a visual timeline, all nine parts, separate anime/manga progress, adaptation coverage, and configurable Friday/monthly release estimates.
+
+**[Download the Opera-ready ZIP](https://github.com/iizepic128/bigfluffydragon/raw/refs/heads/JoJo%27s-BS/jojo-journey/jojo-journey.zip)**
+
+Extract the ZIP, then open `JoJo-Journey.html` in Opera using **Ctrl+O** (**Command+O** on Mac). Windows users can also run `Open in Opera.cmd`. No Node or server is needed for the standalone app.
+
+For a development preview, open a terminal in `jojo-journey` and run `npm start` (Node.js 22.13+). See the [app README](jojo-journey/README.md) and [verification report](jojo-journey/TESTING.md) for features, release assumptions, and browser test limitations.
+
+---
+
 # Neon Outlaws
 Original stylized 3D open-world browser game alpha built with Three.js, TypeScript, and Vite.
 
