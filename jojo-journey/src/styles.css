@@ -16,3 +16,4 @@
 @media(max-width:760px){.nav-backdrop{left:225px}}
 @media(max-width:520px){.topbar .export-button{display:grid}.search input{width:clamp(95px,35vw,150px)}.filter-bar{flex-wrap:wrap;row-gap:0}.order-label{display:flex;font-size:10px;margin:0 0 8px auto}.filters{width:100%;margin-bottom:5px}.order-label select{padding-top:7px;padding-bottom:7px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+.part-emblem.part-logo{object-fit:contain;transform:translateX(-32%);filter:none}

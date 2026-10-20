@@ -1,4 +1,6 @@
 import type { Part } from './model';
+import battleTendencyEmblem from './assets/battle-tendency-emblem.png';
+import stardustCrusadersEmblem from './assets/stardust-crusaders-emblem.png';
 
 export function Emblem({ motif, className = '' }: { motif: string; className?: string }) {
   return <svg viewBox="0 0 160 160" fill="none" className={className} aria-hidden="true">
@@ -17,10 +19,13 @@ export function Emblem({ motif, className = '' }: { motif: string; className?: s
 }
 
 export function PartArtwork({ part, className = '' }: { part: Part; className?: string }) {
+  const logo = part.id === 2 ? battleTendencyEmblem : part.id === 3 ? stardustCrusadersEmblem : undefined;
   return <div className={`part-art ${className}`} style={{ background: part.color, color: part.ink }}>
     <div className="art-grid" /><span className="art-ghost">{String(part.id).padStart(2, '0')}</span>
     <span className="art-label">JOESTAR<br />ARCHIVES</span><span className="art-spark">✦</span>
-    <Emblem motif={part.motif} className="part-emblem" />
+    {logo
+      ? <img src={logo} className="part-emblem part-logo" alt="" aria-hidden="true" draggable={false} />
+      : <Emblem motif={part.motif} className="part-emblem" />}
     <span className="art-location">{part.setting}</span><span className="art-year">{part.era}</span>
   </div>;
 }
